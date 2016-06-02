@@ -29,7 +29,8 @@
     <script type="text/javascript">
         app.initialize();
 		
-		
+		var mesesArr = new Array();
+		var anioArr = new Array();//['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun','Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 		
 		$(function() {
 		
@@ -50,6 +51,13 @@
 					url: 'http://10.6.2.103/portal/phoneGap/consumoHistoricoSicom_json.php?medidor='+medidor.val(), 
 					 success: function (result) { 
 					 	$.each(result, function(i, field){
+							
+							if(!$.inArray( (field.mes +1), mesesArr ) )
+							{ mesesArr.push((field.mes +1));}
+							
+							if(!$.inArray( (field.anio), anioArr ) )
+							{ anioArr.push((field.anio));}
+							
 					 
 						 $("#tbody").append("<tr><td class=\"title\">"+field.rpuTmp+"</td><td>"+(field.anio +'-'+ field.mes)+"</td><td>"+field.consumokwh+"</td><td>$ "+field.total+"</td></tr>");
 					 
@@ -79,19 +87,24 @@
 			
 			
 			
-			 var arreMes = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun','Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+			 
                 var datos =[7.0, 55, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6];
     $('#grafcontainer').highcharts({
+		credits: {
+            enabled: true,
+            href:"http://www.da0.cfemex.com/portal",
+            text:"Cfe- DDBC- DDTI- GVS"
+        },
         title: {
-            text: 'Consumo promedio de usuario',
+            text: '',
             x: -20 //center
         },
         subtitle: {
-            text: 'Fuente: SICOM-CFE',
+            text: 'Consumo Mensual por año',
             x: -20
         },
         xAxis: {
-            categories: arreMes
+            categories: mesesArr
         },
         yAxis: {
             title: {
