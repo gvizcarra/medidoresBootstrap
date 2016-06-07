@@ -22,9 +22,9 @@
 	<script type="text/javascript" src="js/index.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
       <script src="js/jquery-1.11.1.min.js"></script>
-      <script src="http://code.highcharts.com/adapters/standalone-framework.js"></script>
- <script src="http://code.highcharts.com/stock/highstock.js"></script>
-  <script src="http://code.highcharts.com/modules/exporting.js"></script>
+      <script src="js/standalone-framework.js"></script>
+ <script src="js/highstock.js"></script>
+  <script src="js/exporting.js"></script>
     <script src="js/bootstrap.min.js"></script>
     
     <script type="text/javascript">
@@ -59,6 +59,33 @@
 							 $("#tbody").append("<tr><td class=\"title\">"+field.rpuTmp+"</td><td>"+(field.anio +'-'+ field.mes)+"</td><td>"+field.consumokwh+"</td><td>$ "+field.total+"</td></tr>");
 					 
 						});
+						
+						$('#grafcontainer').highcharts('StockChart', {
+
+									title : {
+										text : 'Consumo Medidor'
+									},
+									plotOptions: {
+										line: {
+											dataLabels: {
+												enabled: true
+											}  
+										}
+									},
+										/*rangeSelector: {
+											enabled: false
+										},*/
+									  series : [{
+										name : 'KWH',
+										data : result.graf,
+										tooltip: {
+											valueDecimals: 2
+										},marker : {
+											enabled : true,
+											radius : 3
+										}
+									}]
+			       			 });
 					 
 					}
 					,error: function()
@@ -69,41 +96,11 @@
 				
 				
 				
+				 
 				
-				$.getJSON('http://www2.da0.cfemex.com/portal/phoneGap/consumoHistoricoSicom_json.php?callback=?&opt=arr&medidor='+medidor.val(), function (data) {
-        // Create the chart
-        $('#grafcontainer').highcharts('StockChart', {
-
-
-            
-
-            title : {
-                text : 'Consumo Medidor'
-            },
-			plotOptions: {
-				line: {
-					dataLabels: {
-						enabled: true
-					} 
-				}
-			},
-				rangeSelector: {
-					enabled: false
-				},
-			  series : [{
-                name : 'KWH',
-                data : data.graf,
-                tooltip: {
-                    valueDecimals: 2
-                },marker : {
-                    enabled : true,
-                    radius : 3
-                }
-            }]
-        });
-    });
-
-				$("#graf").tab('show');
+				
+				
+				 	$("#graf").tab('show');
 				
 			
 			 
@@ -173,7 +170,7 @@
            <!-- <tr>
             	<td colspan="2"  width="100%" align="center"><h3>Proporcionar usuario y contraseña</h3></td>
             </tr>-->
-             <tr>
+            <!-- <tr>
             <td align="left" width="20%">
             	<label for="rpe" class="ui-hidden-accessible">Usuario:</label>
                 </td>
@@ -188,7 +185,7 @@
                 	<td align="left"  width="80%">
                     <input type="password" size="10" name="pass" id="pass" value="" placeholder="Contraseña" data-theme="a">
                 </td>
-            </tr>
+            </tr>-->
             <tr>
                <td align="left" width="20%">
                     <label for="medidor" class="ui-hidden-accessible">Medidor:</label>
