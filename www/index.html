@@ -22,89 +22,117 @@
 	<script type="text/javascript" src="js/index.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
       <script src="js/jquery-1.11.1.min.js"></script>
-      <script src="js/standalone-framework.js"></script>
+
  <script src="js/highstock.js"></script>
-  <script src="js/exporting.js"></script>
     <script src="js/bootstrap.min.js"></script>
     
     <script type="text/javascript">
         app.initialize();
 		
-		var mesesArr = new Array();
-		var anioArr = new Array();//['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun','Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-		
+		 
 		$(function() {
 		
 		var rpe 	= $("#rpe");
 		var pass 	= $("#pass");
-		var medidor = $("#medidor");
+		var medidor = $("#medidor").val();
 		var i=0;
+		var chart;
+		
+		var grafOptions = {
+                chart: {
+                    renderTo: 'grafcontainer',
+                    type: 'line',
+                    marginRight: 130,
+                    marginBottom: 25
+                },
+                title: {
+                    text: 'Medidor '+medidor,
+                    x: -20 //center
+                },
+				 credits: {
+					enabled: true,
+					text: "CFE-DDBC-DDTI-GVS"
+				},
+		
+				legend: {
+					enabled: false,
+				},
+				plotOptions: {
+				line: {
+					dataLabels: {
+							enabled: true
+						}  
+					}
+				},
+                subtitle: {
+                    text: '',
+                    x: -20
+                },
+                xAxis: {
+                    categories: [],
+					labels: {
+								rotation: 0,
+								step:4
+							}
+                },
+                yAxis: {
+                    title: {
+                        text: 'KWH'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                tooltip: {
+                    formatter: function() {
+                            return '<b>'+ this.series.name +'</b><br/>'+
+                            this.x +': '+ this.y;
+                    }
+                },
+			 
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'top',
+                    x: -10,
+                    y: 100,
+                    borderWidth: 0
+                },
+                series: []
+            };
 		
 		
-		
-		$("#verificar").on("click",function(){
-		//$("#h1id").text("click");
-			event.preventDefault();
-			$("#tbody").empty();
-			//alert("medidor: "+$("#medidor").val());
+		 
 			
 			
-				$.ajax({ 
-					type: 'GET', 
-					url: 'http://www2.da0.cfemex.com//portal/phoneGap/consumoHistoricoSicom_json.php?medidor='+medidor.val(), 
-					 success: function (result) { 
-					  
-					 	$.each(result.lista, function(i, field){
+			
+				$("#verificar").on("click",function(){
+					event.preventDefault();
+					
+					 $.getJSON("http://www2.da0.cfemex.com/portal/phoneGap/consumoHistoricoSicom_json.php?medidor="+medidor, function(json) {
+        
+							grafOptions.xAxis.categories = json.graf[0]['data']; // agrega datos de las categorias, en este caso las fechas
+							grafOptions.series[0] = json.graf[1];// agregar datos de la seria ala grafica
+							
+							chart = new Highcharts.Chart(grafOptions);
+							
+							
+							$.each(json.lista[0], function(i, field){
 					 
 							 $("#tbody").append("<tr><td class=\"title\">"+field.rpuTmp+"</td><td>"+(field.anio +'-'+ field.mes)+"</td><td>"+field.consumokwh+"</td><td>$ "+field.total+"</td></tr>");
 					 
 						});
-						
-						$('#grafcontainer').highcharts('StockChart', {
+							
+							
+					   
+					});
+								
 
-									title : {
-										text : 'Consumo Medidor'
-									},
-									plotOptions: {
-										line: {
-											dataLabels: {
-												enabled: true
-											}  
-										}
-									},
-										/*rangeSelector: {
-											enabled: false
-										},*/
-									  series : [{
-										name : 'KWH',
-										data : result.graf,
-										tooltip: {
-											valueDecimals: 2
-										},marker : {
-											enabled : true,
-											radius : 3
-										}
-									}]
-			       			 });
-					 
-					}
-					,error: function()
-					{
-						alert("error");
-						}
+
+					$("#graf").tab('show');
 				});
-				
-				
-				
-				 
-				
-				
-				
-				 	$("#graf").tab('show');
-				
-			
-			 
-			});
 			
 			
 		 
