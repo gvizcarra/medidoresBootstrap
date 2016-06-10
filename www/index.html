@@ -20,6 +20,7 @@
 
  
 	<script type="text/javascript" src="js/index.js"></script>
+
     <link rel="stylesheet" href="css/bootstrap.min.css">
       <script src="js/jquery-1.11.1.min.js"></script>
 
@@ -181,6 +182,7 @@
 							 							chart = new Highcharts.Chart(grafOptions);*/
 							
 							$("#tbody").empty();
+							
 							$.each(json, function(i, field){
 					 
 							 $("#tbody").append("<tr><td class=\"title\">"+field.rpuTmp+"</td><td>"+(field.anio +'-'+ field.mes)+"</td><td>"+field.consumokwh+"</td><td>$ "+field.total+"</td></tr>");
@@ -221,7 +223,16 @@
 
 	
 	$("#locationbtn").on("click",function(){
-    navigator.geolocation.getCurrentPosition(onSuccessgeo, onError);
+   // navigator.geolocation.getCurrentPosition(onSuccessgeo, onError);
+	alert("entro...");
+	try {
+      var uuid =  uuid; //* * //always use device object after deviceready.**
+
+   } catch (e) {
+
+      alert(e);
+
+   }
 	});
 	
 			
@@ -296,8 +307,12 @@
               
 		</table>
         </div>
+
     </div>
-    </form>      
+    </form>
+<div>
+    <p id="deviceProperties">Loading device properties...</p>
+  </div>      
     </div>
     <div id="grafica" class="tab-pane fade">
        <div id="grafcontainer">
