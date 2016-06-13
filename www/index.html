@@ -19,18 +19,43 @@
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
 
  
-	<script type="text/javascript" src="js/index.js"></script>
+ 
 
     <link rel="stylesheet" href="css/bootstrap.min.css">
       <script src="js/jquery-1.11.1.min.js"></script>
 
  <script src="js/highcharts.js"></script>
+  <script src="js/index.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
     
     <script type="text/javascript">
-        app.initialize();
+      document.addEventListener("deviceready", onDeviceReady, false);
+
+// PhoneGap is ready
+//
+document.addEventListener("deviceready", onDeviceReady, false);
+function onDeviceReady() { 
+	var element = document.getElementById('deviceProperties');
+        element.innerHTML = app.deviceSerial()+' - '+ app.devicePlatform()+' - '+ app.deviceUUID()+' - '+ app.conexionType();
+	var options = { limit: 1 };
+
+/*navigator.device.capture.captureImage(captureSuccess, captureError, options);	
+	 
+	 function captureSuccess(mediaFiles) {
+    var i, path, len;
+    for (i = 0, len = mediaFiles.length; i < len; i += 1) {
+        path = mediaFiles[i].fullPath;
+       alert(path);
+    }
+};*/
+
+var captureError = function(error) {
+    navigator.notification.alert('Error code: ' + error.code, null, 'Capture Error');
+};
+							
+}	
 		
-		 
 		$(function() {
 		
 		var rpe 	= $("#rpe");
@@ -39,71 +64,7 @@
 		var i=0;
 		var graficax;
 		
-		/*var grafOptions = {
-                chart: {
-                    renderTo: 'grafcontainer',
-                    type: 'line',
-                    marginRight: 130,
-                    marginBottom: 25
-                },
-                title: {
-                    text: 'Medidor ',
-                    x: -20 //center
-                },
-				 credits: {
-					enabled: true,
-					text: "CFE-DDBC-DDTI-GVS"
-				},
-		
-				legend: {
-					enabled: false,
-				},
-				plotOptions: {
-				line: {
-					dataLabels: {
-							enabled: true
-						}  
-					}
-				},
-                subtitle: {
-                    text: '',
-                    x: -20
-                },
-                xAxis: {
-                    categories: [],
-					labels: {
-								rotation: 0,
-								step:4
-							}
-                },
-                yAxis: {
-                    title: {
-                        text: 'KWH'
-                    },
-                    plotLines: [{
-                        value: 0,
-                        width: 1,
-                        color: '#808080'
-                    }]
-                },
-                tooltip: {
-                    formatter: function() {
-                            return '<b>'+ this.series.name +'</b><br/>'+
-                            this.x +': '+ this.y;
-                    }
-                },
-			 
-                legend: {
-                    layout: 'vertical',
-                    align: 'right',
-                    verticalAlign: 'top',
-                    x: -10,
-                    y: 100,
-                    borderWidth: 0
-                },
-                series: []
-            };*/
-		
+		 
 		
 	
 				
@@ -171,26 +132,17 @@
 			
 				$("#verificar").on("click",function(){
 					event.preventDefault();
+					$("#tbody").empty();
 					 
 					medidorx = $("#medidor").val().toUpperCase();
 					 $.getJSON("http://www2.da0.cfemex.com/portal/phoneGap/consumoHistoricoSicom_json.php?opt=list&medidor="+medidorx, function(json) {
         
-		
-							//alert(json.meses);
-							/*grafOptions.xAxis.categories = json.meses; // agrega datos de las categorias, en este caso las fechas
-							grafOptions.series[0] = json.consumo;// agregar datos de la seria ala grafica
-							 							chart = new Highcharts.Chart(grafOptions);*/
-							
-							$("#tbody").empty();
-							
-							$.each(json, function(i, field){
+		  	 				$.each(json, function(i, field){
 					 
 							 $("#tbody").append("<tr><td class=\"title\">"+field.rpuTmp+"</td><td>"+(field.anio +'-'+ field.mes)+"</td><td>"+field.consumokwh+"</td><td>$ "+field.total+"</td></tr>");
 					 
 						});
-							
-							
-					   
+			
 					});
 								
 
@@ -224,18 +176,60 @@
 	
 	$("#locationbtn").on("click",function(){
    // navigator.geolocation.getCurrentPosition(onSuccessgeo, onError);
-	alert("entro...");
-	try {
-      var uuid =  uuid; //* * //always use device object after deviceready.**
-
-   } catch (e) {
-
-      alert(e);
-
-   }
+	 try{ 
+	 		 var db = window.openDatabase("medidoresCfeApp.db", "1.0", "medidoresCfeApp DB", 200000);
+			 alert("ok db");
+             db.transaction(populateDB, errorCB, successCB);
+		
+		}
+	 catch (e)
+	 { alert("error:" +e);}
 	});
 	
-			
+	
+	
+	
+	 function errorCB(err) {
+        alert("Error processing SQL: "+err.code);
+    }
+
+    // Transaction success callback
+    //
+    function successCB() {
+		var db = window.openDatabase("medidoresCfeApp.db", "1.0", "medidoresCfeApp DB", 200000);
+        db.transaction(queryDB, errorCB);
+    }
+	
+	
+	function populateDB(tx) 
+   {
+        //tx.executeSql('CREATE DATABASE IF NOT EXISTS MisServiciosCfe');
+        tx.executeSql('CREATE TABLE IF NOT EXISTS MisServicios (rpu TEXT,cuenta TEXT,medidor TEXT,tarifa TEXT,direccion TEXT,nombreCliente TEXT)');
+	tx.executeSql('CREATE TABLE IF NOT EXISTS MisFacturaciones (idServicio INTEGER,idRpu TEXT,consumoKwh TEXT,importe TEXT,fechaLectura TEXT,lecturaKwh TEXT,lugarPago TEXT,fechaPago TEXT,importePagado TEXT)');
+        
+	tx.executeSql('INSERT INTO MisServicios (rpu ,cuenta ,medidor ,tarifa,direccion ,nombreCliente) VALUES ("016990200185","79DA15A025203160","7416KX","1F","Fernando Amilpa 1848 Infonavit Cucapah 21231","Isabel Paez Castro")');
+	tx.executeSql('INSERT INTO MisServicios (rpu ,cuenta ,medidor ,tarifa,direccion ,nombreCliente) VALUES ("116990200186","89DA15A025203164","8416KY","1F","Calle 1ra, zona Centro 12456","Jose Calderon Castro")');
+	tx.executeSql('INSERT INTO MisServicios (rpu ,cuenta ,medidor ,tarifa,direccion ,nombreCliente) VALUES ("216990200187","99DA15A025203163","9416KZ","1F","Islas Hawaii 250, Fracc. Jardines del Lago","Miguel Stanton")');
+
+        
+    }
+
+    // Query the database
+    //
+    function queryDB(tx) {
+        tx.executeSql('SELECT * FROM MisServicios', [], querySuccess, errorCB);
+    }
+
+    // Query the success callback
+    //
+    function querySuccess(tx, results) {
+        var len = results.rows.length;
+        alert("DEMO table: " + len + " rows found.");
+        for (var i=0; i<len; i++){
+            alert("Row = " + i + " ID = " + results.rows.item(i).rpu + " Data =  " + results.rows.item(i).nombreCliente);
+        }
+    }
+	
 			
 		});
     </script>
@@ -255,7 +249,7 @@
       <div class="panel-heading">Consumo KWH de Clientes</div>
       <div class="panel-body">
   <ul class="nav nav-pills">
-    <li class="active"><a id="#home" data-toggle="pill" href="#home">Entrar</a></li>
+    <li class="active"><a id="#home" data-toggle="pill" href="#home">Inicio</a></li>
     <li><a id="graf" data-toggle="pill" href="#grafica">Grafica</a></li>
     <li><a id="list" data-toggle="pill" href="#listado">Listado</a></li>
   </ul>
@@ -265,7 +259,7 @@
     <div id="home" class="tab-pane fade in active">
       <form>
         <div class="panel panel-default">
-      <div class="panel-heading">Proporcionar usuario y contraseña</div>
+      <div class="panel-heading">Consulta de Consumo KWH</div>
       <div class="panel-body">
 			<table width="100%" border="0">
            <!-- <tr>
@@ -311,7 +305,7 @@
     </div>
     </form>
 <div>
-    <p id="deviceProperties">Loading device properties...</p>
+    <p id="deviceProperties" class="blink">Loading device properties...</p>
   </div>      
     </div>
     <div id="grafica" class="tab-pane fade">
@@ -339,9 +333,7 @@
 </div>
 </body>
 
-<script>
 
-</script>
 </html>
 
 
